@@ -22,10 +22,124 @@ const perPage = 10;
 let total;
 
 // Initialize pagination controls for authors
-const paginationElementAuthors = document.getElementById("get_pagination_authors");  // Adjust the ID
+const paginationElementAuthors = document.getElementById("get_pagination");  // Adjust the ID
 
 // Declare forUpdateId variable here
 let forUpdateId = "";
+
+// Move addPaginationLink function here
+function addPaginationLink(href, text, isActive = false) {
+  const li = document.createElement("li");
+  const a = document.createElement("a");
+  a.href = href;
+  a.textContent = text;
+  if (isActive) {
+    a.classList.add("active");
+  }
+  li.appendChild(a);
+  paginationElementAuthors.appendChild(li);
+}
+
+const form_author = document.getElementById("form_author");
+
+form_author.onsubmit = async (e) => {
+  e.preventDefault();
+
+  // Disable Button
+  document.querySelector("#form_author button[type='submit']").disabled = true;
+  document.querySelector(
+    "#form_author button[type='submit']"
+  ).innerHTML = `<div class="spinner-border me-2" role="status"></div>
+                        <span>Loading...</span>`;
+
+  // Get Values of Form (input, textarea, select) set it as form-data
+  const formData = new FormData(form_author);
+
+  // Remove 'user_id' from FormData (if it's present)
+  if (form_author.querySelector('input[name="user_id"]')) {
+    formData.delete('user_id');
+  }
+
+  console.log("FormData:", [...formData.entries()]);  // Log FormData before making the fetch request
+
+  let response;
+
+  // Check if for_update_id is empty, if empty, then it's create, else it's update
+  if (forUpdateId === "") {
+    // Fetch API Authors Store Endpoint
+    response = await fetch(backendURL + "/api/authors", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(formData).toString(),
+    });
+  }
+  // for Update
+  else {
+    // Fetch API Authors Update Endpoint
+    response = await fetch(backendURL + "/api/authors/" + forUpdateId, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(formData).toString(),
+    });
+  }
+
+  console.log("Response:", response);  // Log the response to check for any error messages
+
+  // Get response if 200-299 status code
+  if (response.ok) {
+    // Reset Form
+    form_author.reset();
+
+    successNotification(
+      "Successfully " +
+        (forUpdateId === "" ? "created" : "updated") +
+        " author.",
+      10
+    );
+
+    // Close Modal Form
+    document.getElementById("modal_close").click();
+
+    // Reload Authors
+    getAuthors();
+  }
+  // Get response if 422 status code
+  else if (response.status === 422) {
+    try {
+      const json = await response.json();
+      // Log the error messages
+      console.error("Error Messages:", json.errors);
+      // Close Modal Form
+      document.getElementById("modal_close").click();
+      // Display error notification
+      errorNotification(json.message, 10);
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      // Close Modal Form
+      document.getElementById("modal_close").click();
+      // Display a generic error notification
+      errorNotification("An error occurred while processing your request.", 10);
+    }
+  }
+
+  // Always reset forUpdateId to an empty string
+  forUpdateId = "";
+
+  document.querySelector("#form_author button[type='submit']").disabled = false;
+  document.querySelector("#form_author button[type='submit']").innerHTML =
+    "Submit";
+};
+
+// Get All Authors
+getAuthors();
 
 function createAuthorCard(author) {
   return `<div class="col-sm-12">
@@ -124,17 +238,43 @@ function pageActionAuthors(e) {
 
 // ... (other functions remain the same)
 
-// Update your event listener for pagination links for authors
-paginationElementAuthors.addEventListener("click", function (e) {
-  e.preventDefault();
-  const target = e.target;
+if (paginationElementAuthors) {
+  paginationElementAuthors.addEventListener("click", function (e) {
+    e.preventDefault();
+    const target = e.target;
 
-  if (target.tagName === "A" && !target.classList.contains("active")) {
-    const url = target.getAttribute("href");
-    getAuthors(url);
+    if (target.tagName === "A" && !target.classList.contains("active")) {
+      const url = target.getAttribute("href");
+      getAuthors(url);
+    }
+  });
+}
+
+function updatePaginationAuthors(data, keyword = "") {
+  paginationElementAuthors.innerHTML = ""; // Clear previous pagination
+
+  // Add Previous page control
+  if (data.prev_page_url) {
+    addPaginationLink(data.prev_page_url, "Previous");
   }
-});
 
+  // Add page controls
+  for (let i = 1; i <= data.last_page; i++) {
+    addPaginationLink(
+      backendURL + "/api/authors?page=" + i + (keyword ? "&keyword=" + keyword : ""),
+      i.toString(),
+      i === data.current_page
+    );
+  }
+
+  // Add Next page control
+  if (data.next_page_url) {
+    addPaginationLink(
+      backendURL + "/api/authors?page=" + (data.current_page + 1) + (keyword ? "&keyword=" + keyword : ""),
+      "Next"
+    );
+  }
+}
 // ... (other functions remain the same)
 
 // Initialize by getting the authors automatically when the page loads
@@ -217,105 +357,4 @@ const showAuthorData = async (id) => {
   }
 };
 
-let for_update_id = "";
 
-const form_author = document.getElementById("form_author");
-
-form_author.onsubmit = async (e) => {
-  e.preventDefault();
-
-  // Disable Button
-  document.querySelector("#form_author button[type='submit']").disabled = true;
-  document.querySelector(
-    "#form_author button[type='submit']"
-  ).innerHTML = `<div class="spinner-border me-2" role="status"></div>
-                        <span>Loading...</span>`;
-
-  // Get Values of Form (input, textarea, select) set it as form-data
-  const formData = new FormData(form_author);
-
-  // Remove 'user_id' from FormData (if it's present)
-  if (form_author.querySelector('input[name="user_id"]')) {
-    formData.delete('user_id');
-  }
-
-  console.log("FormData:", [...formData.entries()]);  // Log FormData before making the fetch request
-
-  let response;
-
-  // Check if for_update_id is empty, if empty, then it's create, else it's update
-  if (for_update_id === "") {
-    // Fetch API Authors Store Endpoint
-    response = await fetch(backendURL + "/api/authors", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(formData).toString(),
-    });
-  }
-  // for Update
-  else {
-    // Fetch API Authors Update Endpoint
-    response = await fetch(backendURL + "/api/authors/" + for_update_id, {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(formData).toString(),
-    });
-  }
-
-  console.log("Response:", response);  // Log the response to check for any error messages
-
-  // Get response if 200-299 status code
-  if (response.ok) {
-    // Reset Form
-    form_author.reset();
-
-    successNotification(
-      "Successfully " +
-        (for_update_id === "" ? "created" : "updated") +
-        " author.",
-      10
-    );
-
-    // Close Modal Form
-    document.getElementById("modal_close").click();
-
-    // Reload Authors
-    getAuthors();
-  }
-  // Get response if 422 status code
-  else if (response.status === 422) {
-    try {
-      const json = await response.json();
-      // Log the error messages
-      console.error("Error Messages:", json.errors);
-      // Close Modal Form
-      document.getElementById("modal_close").click();
-      // Display error notification
-      errorNotification(json.message, 10);
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      // Close Modal Form
-      document.getElementById("modal_close").click();
-      // Display a generic error notification
-      errorNotification("An error occurred while processing your request.", 10);
-    }
-  }
-
-  // Always reset for_update_id to an empty string
-  for_update_id = "";
-
-  document.querySelector("#form_author button[type='submit']").disabled = false;
-  document.querySelector("#form_author button[type='submit']").innerHTML =
-    "Submit";
-};
-
-// Get All Authors
-getAuthors();
