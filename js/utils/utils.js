@@ -4,7 +4,8 @@ import { setRouter } from "../router/router.js";
 setRouter();
 
 // Backend URL
-const backendURL = "https://b234-216-247-39-181.ngrok-free.app";
+const backendURL = "https://d2a9-216-247-39-181.ngrok-free.app";
+
 
 // Get Logged User Profile
 async function getLoggedUser() {
