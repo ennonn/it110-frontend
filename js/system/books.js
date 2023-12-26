@@ -96,6 +96,7 @@ const showBookData = async (id) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -152,6 +153,7 @@ async function getBooks(page = 1, keyword = "") {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -164,6 +166,7 @@ async function getBooks(page = 1, keyword = "") {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
+        'ngrok-skip-browser-warning': 'any'
       },
     });
     
@@ -171,6 +174,7 @@ async function getBooks(page = 1, keyword = "") {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
+        'ngrok-skip-browser-warning': 'any'
       },
     });
 
@@ -329,13 +333,16 @@ async function getAuthorsDropdown() {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
   if (response.ok) {
-    const json = await response.json();
+    const responseData = await response.json();
+    const authors = responseData.data; // Access the 'data' property
+
     let options = '<option value="" disabled selected>Select Author</option>';
-    json.forEach((author) => {
+    authors.forEach((author) => {
       options += `<option value="${author.id}">${author.first_name} ${author.last_name}</option>`;
     });
 
@@ -354,6 +361,7 @@ async function getGenresDropdown() {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -412,6 +420,7 @@ async function sendBookRequest(formData) {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'any'
       },
       body: JSON.stringify(Object.fromEntries(formData)),
     });
@@ -456,6 +465,7 @@ async function deleteBookRequest(bookId) {
     headers: {
       Accept: 'application/json',
       Authorization: 'Bearer ' + localStorage.getItem('token'),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 

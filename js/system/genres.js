@@ -78,12 +78,15 @@ async function getGenres(url = "", keyword = "") {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
+        'ngrok-skip-browser-warning': 'any'
       },
     });
 
     // Get response if 200-299 status code
     if (response.ok) {
-      const json = await response.json();
+      const responseBody = await response.text(); // Read the response body as text
+      const json = JSON.parse(responseBody); // Parse the text as JSON
+
       // Display Genres
       let container = "";
       json.data.forEach((genre) => {
@@ -108,6 +111,9 @@ async function getGenres(url = "", keyword = "") {
     }
     // Get response if 400+ or 500+ status code
     else {
+      console.error("HTTP-Error: " + response.status);
+      console.log("Response Headers:", response.headers);
+      console.log("Response Body:", await response.text());
       errorNotification("HTTP-Error: " + response.status);
     }
   } catch (error) {
@@ -116,6 +122,74 @@ async function getGenres(url = "", keyword = "") {
   }
 }
 
+
+/* async function getGenres(url = "", keyword = "") {
+  // Add Loading if pagination or search is used; Remove if not needed
+  if (url !== "" || keyword !== "") {
+    document.getElementById("get_data").innerHTML = `<div class="col-sm-12 d-flex justify-content-center align-items-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <b class="ms-2">Loading Data...</b>
+      </div>`;
+  }
+
+  // To cater pagination and search feature
+  let queryParams =
+    "?" +
+    (url !== "" ? new URL(url).searchParams + "&" : "") +
+    (keyword !== "" ? "keyword=" + keyword : "");
+
+  try {
+    // Get Genres API Endpoint; Caters search and pagination
+    const response = await fetch(backendURL + "/api/genres" + queryParams, {
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    // Check if the response status is not OK
+    if (!response.ok) {
+      throw new Error("HTTP-Error: " + response.status);
+    }
+
+    // Check if the content type is JSON
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid content type: " + contentType);
+    }
+
+    // Parse JSON data
+    const json = await response.json();
+
+    // Display Genres
+    let container = "";
+    json.data.forEach((genre) => {
+      container += createGenreCard(genre);
+    });
+    document.getElementById("get_data").innerHTML = container;
+
+    // Assign click event on Edit Btns
+    document.querySelectorAll("#btn_edit").forEach((element) => {
+      element.addEventListener("click", editAction);
+    });
+
+    // Assign click event on Delete Btns
+    document.querySelectorAll("#btn_delete").forEach((element) => {
+      element.addEventListener("click", deleteAction);
+    });
+
+    // Update pagination controls only if a keyword is present
+    if (keyword !== "") {
+      updatePaginationGenres(json, keyword);
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    errorNotification("Error fetching data");
+  }
+  
+} */
 function pageAction(e) {
   e.preventDefault();
   const url = e.target.getAttribute("href");
@@ -197,6 +271,7 @@ const deleteAction = async (e) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -242,6 +317,7 @@ const showGenreData = async (id) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -295,6 +371,7 @@ form_genre.onsubmit = async (e) => {
       method: "POST",
       headers: headers,
       body: JSON.stringify(requestBody),
+      'ngrok-skip-browser-warning': 'any'
     });
   }
   // for Update
@@ -304,6 +381,7 @@ form_genre.onsubmit = async (e) => {
       method: "PUT",
       headers: headers,
       body: JSON.stringify(requestBody),
+      'ngrok-skip-browser-warning': 'any'
     });
   }
 

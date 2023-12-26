@@ -73,6 +73,7 @@ form_author.onsubmit = async (e) => {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
         'Content-Type': 'application/x-www-form-urlencoded',
+        'ngrok-skip-browser-warning': 'any'
       },
       body: new URLSearchParams(formData).toString(),
     });
@@ -86,6 +87,7 @@ form_author.onsubmit = async (e) => {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
         'Content-Type': 'application/x-www-form-urlencoded',
+        'ngrok-skip-browser-warning': 'any'
       },
       body: new URLSearchParams(formData).toString(),
     });
@@ -192,6 +194,7 @@ async function getAuthors(url = "", keyword = "") {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
+        'ngrok-skip-browser-warning': 'any'
       },
     });
 
@@ -293,6 +296,7 @@ const deleteAction = async (e) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
@@ -340,6 +344,7 @@ const showAuthorData = async (id) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 

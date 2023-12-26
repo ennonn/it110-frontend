@@ -4,7 +4,7 @@ import { setRouter } from "../router/router.js";
 setRouter();
 
 // Backend URL
-const backendURL = "http://backend.test";
+const backendURL = "https://b234-216-247-39-181.ngrok-free.app";
 
 // Get Logged User Profile
 async function getLoggedUser() {
@@ -13,6 +13,7 @@ async function getLoggedUser() {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + localStorage.getItem("token"),
+      'ngrok-skip-browser-warning': 'any'
     },
   });
 
